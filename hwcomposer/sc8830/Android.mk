@@ -60,7 +60,7 @@ LOCAL_SRC_FILES := \
 	dump.cpp \
 
 LOCAL_C_INCLUDES := \
-	$(LOCAL_PATH)/../../libmemoryheapion/ \
+	$(LOCAL_PATH)/../../libmemoryheapion_sprd/ \
 	$(TARGET_OUT_INTERMEDIATES)/KERNEL_OBJ/usr/include/video/ \
 	$(TARGET_OUT_INTERMEDIATES)/KERNEL_OBJ/usr/include/
 
@@ -71,7 +71,7 @@ LOCAL_CFLAGS += \
 	-DSCX30G_V2
 else
 LOCAL_C_INCLUDES += \
-	$(LOCAL_PATH)/../../gralloc/$(TARGET_BOARD_PLATFORM)
+	$(LOCAL_PATH)/../../gralloc/
 endif
 
 LOCAL_ADDITIONAL_DEPENDENCIES += \

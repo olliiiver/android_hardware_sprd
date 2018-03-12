@@ -1,5 +1,8 @@
+# 
+# Copyright (C) 2010 ARM Limited. All rights reserved.
+# 
+# Copyright (C) 2008 The Android Open Source Project
 #
-# Copyright (C) 2016 The Android Open Source Project
 # Copyright (C) 2016 The CyanogenMod Project
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,20 +18,65 @@
 # limitations under the License.
 #
 
+ifneq ($(TARGET_SIMULATOR),true)
+
 LOCAL_PATH := $(call my-dir)
 
-supported_boards := \
-	sc8830 \
-	scx15 \
-	sc8810 \
+include $(CLEAR_VARS)
 
-ifeq ($(SOC_SCX30G_V2),true)
+LOCAL_PRELINK_MODULE := false
 
-ifeq ($(TARGET_UPDATED_MALI),true)
-include $(call all-named-subdir-makefiles,scx30g2)
+LOCAL_MODULE := gralloc.$(TARGET_BOARD_PLATFORM)
+LOCAL_MODULE_PATH := $(TARGET_OUT_SHARED_LIBRARIES)/hw
+
+LOCAL_MODULE_TAGS := optional
+
+SHARED_MEM_LIBS := \
+    libion_sprd \
+    libhardware
+
+LOCAL_SHARED_LIBRARIES := \
+    liblog \
+    libcutils \
+    libGLESv1_CM \
+    $(SHARED_MEM_LIBS) \
+
+LOCAL_C_INCLUDES := \
+    $(TOP)/hardware/sprd/libion_sprd/include \
+    $(TARGET_OUT_INTERMEDIATES)/KERNEL_OBJ/usr/include/video/ \
+    $(TARGET_OUT_INTERMEDIATES)/KERNEL_OBJ/usr/include/ \
+    $(TARGET_OUT_INTERMEDIATES)/KERNEL_OBJ/ \
+
+LOCAL_ADDITIONAL_DEPENDENCIES += \
+    $(TARGET_OUT_INTERMEDIATES)/KERNEL_OBJ/usr \
+
+LOCAL_EXPORT_C_INCLUDE_DIRS := \
+    $(LOCAL_PATH) \
+    $(LOCAL_C_INCLUDES) \
+
+LOCAL_CFLAGS := \
+    -DLOG_TAG=\"gralloc.$(TARGET_BOARD_PLATFORM)\" \
+
+ifeq ($(strip $(USE_UI_OVERLAY)),true)
+LOCAL_CFLAGS += -DUSE_UI_OVERLAY
 endif
 
-else ifneq (,$(filter $(supported_boards),$(TARGET_BOARD_PLATFORM)))
-include $(call all-named-subdir-makefiles,$(TARGET_BOARD_PLATFORM))
+ifneq ($(strip $(TARGET_BUILD_VARIANT)),user)
+LOCAL_CFLAGS += -DDUMP_FB
+endif
+
+ifeq ($(USE_SPRD_DITHER),true)
+LOCAL_CFLAGS += -DSPRD_DITHER_ENABLE
+LOCAL_SHARED_LIBRARIES += libdither
+endif
+
+LOCAL_SRC_FILES := \
+    gralloc_module.cpp \
+    alloc_device.cpp \
+    framebuffer_device.cpp \
+    dump_bmp.cpp \
+
+#LOCAL_CFLAGS+= -DMALI_VSYNC_EVENT_REPORT_ENABLE
+include $(BUILD_SHARED_LIBRARY)
 
 endif
